@@ -133,43 +133,33 @@ input  wire [31:0]  dmem_read_data,
     wire valid_in_imem;
     wire valid_in_dmem;
 
-reg boot_req_pending;
-reg boot_req_write;
+wire boot_write_req;
+wire boot_read_req;
+
+assign boot_write_resp = boot_write_req;
 
 always @(posedge clk or negedge rst_n)
 begin
     if(!rst_n)
-    begin
-        boot_req_pending <= 1'b0;
-        boot_req_write   <= 1'b0;
-    end
-    else if(boot_load_enable && in_valid)
-    begin
-        boot_req_pending <= 1'b1;
-        boot_req_write   <= write_en;
-    end
-    else if(resp_valid)
-    begin
-        boot_req_pending <= 1'b0;
-    end
+        boot_write_resp <= 1'b0;
+    else
+        boot_write_resp <= boot_write_req;
 end
-
-wire boot_write_resp;
-reg  boot_read_resp;
-
-       assign boot_write_resp =
-       boot_req_pending &&
-       boot_req_write;
 
 always @(posedge clk or negedge rst_n)
 begin
     if(!rst_n)
         boot_read_resp <= 1'b0;
     else
-        boot_read_resp <=
-              boot_req_pending &&
-             !boot_req_write;
-end   
+        boot_read_resp <= boot_read_req;
+end
+   
+
+
+
+
+reg boot_write_resp;
+reg boot_read_resp;
     
     
        assign imem_valid =
@@ -216,7 +206,19 @@ assign valid_in_dmem =
       ((in_address >= DMEM_START_ADDR) &&
        (in_address <= DMEM_END_ADDR));
 
-   
+assign boot_write_req =
+
+       boot_load_enable &&
+       in_valid &&
+       write_en &&
+       (valid_in_imem || valid_in_dmem);
+
+assign boot_read_req =
+
+       boot_load_enable &&
+       in_valid &&
+       read_en &&
+       (valid_in_imem || valid_in_dmem); 
           
 
     /*====================================================*/
@@ -317,9 +319,17 @@ assign read_resp =
 /*----------------------------------------------------*/
 
 assign write_resp =
-           pte_write_valid ?
-           pte_write_resp :
-           axi_write_resp;
+
+       pte_write_valid ?
+       pte_write_resp :
+
+       axi_write_valid ?
+       axi_write_resp :
+
+       boot_write_resp ?
+       2'b00 :
+
+       2'b00;
 
 endmodule
 

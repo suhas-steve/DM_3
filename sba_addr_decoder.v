@@ -133,6 +133,44 @@ input  wire [31:0]  dmem_read_data,
     wire valid_in_imem;
     wire valid_in_dmem;
 
+reg boot_req_pending;
+reg boot_req_write;
+
+always @(posedge clk or negedge rst_n)
+begin
+    if(!rst_n)
+    begin
+        boot_req_pending <= 1'b0;
+        boot_req_write   <= 1'b0;
+    end
+    else if(boot_load_enable && in_valid)
+    begin
+        boot_req_pending <= 1'b1;
+        boot_req_write   <= write_en;
+    end
+    else if(resp_valid)
+    begin
+        boot_req_pending <= 1'b0;
+    end
+end
+
+wire boot_write_resp;
+reg  boot_read_resp;
+
+       assign boot_write_resp =
+       boot_req_pending &&
+       boot_req_write;
+
+always @(posedge clk or negedge rst_n)
+begin
+    if(!rst_n)
+        boot_read_resp <= 1'b0;
+    else
+        boot_read_resp <=
+              boot_req_pending &&
+             !boot_req_write;
+end   
+    
     
        assign imem_valid =
        boot_load_enable &
@@ -177,6 +215,8 @@ assign valid_in_dmem =
        in_valid &&
       ((in_address >= DMEM_START_ADDR) &&
        (in_address <= DMEM_END_ADDR));
+
+   
           
 
     /*====================================================*/
@@ -232,8 +272,7 @@ assign dmem_write_data =
 /* RESPONSE MUXING                                    */
 /*====================================================*/
 
-
-assign resp_valid =
+ assign resp_valid =
 
            pte_read_valid  |
            pte_write_valid |
@@ -241,8 +280,9 @@ assign resp_valid =
            axi_read_valid  |
            axi_write_valid |
 
-           boot_load_enable |
-           boot_load_enable ;
+           boot_write_resp |
+           boot_read_resp;
+
 
 /*----------------------------------------------------*/
 /* READ RESPONSE PATH                                 */
@@ -250,29 +290,27 @@ assign resp_valid =
 
 assign read_data_out =
 
-           pte_read_valid  ? pte_read_data_out :
+           pte_read_valid ? pte_read_data_out :
 
-           axi_read_valid  ? axi_read_data_out :
+           axi_read_valid ? axi_read_data_out :
 
-          boot_load_enable ? imem_read_data :
+           (boot_read_resp && valid_in_imem) ?
+               imem_read_data :
 
-          boot_load_enable ? dmem_read_data :
+           (boot_read_resp && valid_in_dmem) ?
+               dmem_read_data :
 
-           32'h0;
+           32'h00000000;
 
 assign read_resp =
 
-           pte_read_valid  ? pte_read_resp :
+           pte_read_valid ? pte_read_resp :
 
-           axi_read_valid  ? axi_read_resp :
+           axi_read_valid ? axi_read_resp :
 
-          boot_load_enable  ? 2'b00 :
-
-          boot_load_enable  ? 2'b00 :
+           boot_read_resp ? 2'b00 :
 
            2'b00;
-
-
 
 /*----------------------------------------------------*/
 /* WRITE RESPONSE PATH                                */

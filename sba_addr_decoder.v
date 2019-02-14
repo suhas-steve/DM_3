@@ -135,16 +135,8 @@ input  wire [31:0]  dmem_read_data,
 
 wire boot_write_req;
 wire boot_read_req;
-
-assign boot_write_resp = boot_write_req;
-
-always @(posedge clk or negedge rst_n)
-begin
-    if(!rst_n)
-        boot_write_resp <= 1'b0;
-    else
-        boot_write_resp <= boot_write_req;
-end
+wire boot_write_resp;
+reg boot_read_resp;
 
 always @(posedge clk or negedge rst_n)
 begin
@@ -153,15 +145,17 @@ begin
     else
         boot_read_resp <= boot_read_req;
 end
-   
 
+reg boot_write_req_d;
 
-
-
-reg boot_write_resp;
-reg boot_read_resp;
-    
-    
+always @(posedge clk or negedge rst_n)
+begin
+    if(!rst_n)
+        boot_write_req_d <= 1'b0;
+    else
+        boot_write_req_d <= boot_write_req;
+end
+       
        assign imem_valid =
        boot_load_enable &
        valid_in_imem;
@@ -218,8 +212,11 @@ assign boot_read_req =
        boot_load_enable &&
        in_valid &&
        read_en &&
-       (valid_in_imem || valid_in_dmem); 
-          
+       (valid_in_imem || valid_in_dmem);
+   
+assign boot_write_resp =
+       boot_write_req &
+      ~boot_write_req_d;          
 
     /*====================================================*/
     /* REQUESTS : MMU / PTE                               */

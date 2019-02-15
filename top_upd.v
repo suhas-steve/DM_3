@@ -43,6 +43,8 @@ module debug_module #(
     input  wire         boot_load_enable,
     input  wire [31:0]  imem_read_data,
     input  wire [31:0]  dmem_read_data,
+    input  wire        hart_halted,
+    input  wire        hart_reset,
 
 //....................................................
     output wire         pte_valid,
@@ -74,10 +76,10 @@ module debug_module #(
     output wire         dbg_reg_write,
     output wire [15:0]  dbg_reg_addr,
     output wire [31:0]  dbg_reg_wdata,
-    output wire        hart_running,
-    output wire        hart_halted,
-    output wire        hart_reset
-
+    output wire         haltreq,
+    output wire         resethaltreq,
+    output wire         resumereq,
+    output wire         ndmreset
 
 
 );
@@ -493,8 +495,7 @@ module debug_module #(
         .dbg_resetn (dbg_resetn),
         .dmactive   (dmactive),
         .ndmreset   (ndmreset),
-        .dm_reset   (dm_reset),
-        .hartreset  (hartreset)
+        .dm_reset   (dm_reset)
     );
 
     /* =========================================================
@@ -771,21 +772,6 @@ sba_address_decoder #(
 );
 
 
-    /* =========================================================
-       HART CONTROL FSM
-       ========================================================= */
-    hart_fsm u_hart_fsm (
-        .dbg_clk      (dbg_clk),
-        .dbg_resetn   (dbg_resetn),
-        .hartreset    (hartreset),
-        .haltreq      (haltreq),
-        .resumereq    (resumereq),
-        .resethaltreq (resethaltreq),
-        .ebreak       (1'b0),
-        .hart_running (hart_running),
-        .hart_halted  (hart_halted),
-        .hart_reset   (hart_reset)
-    );
 
 assign progbuf_index  =dmi_req_addr[3:0];
 assign data_index = dmi_req_addr[3:0]- 4'h4;

@@ -415,10 +415,7 @@ module debug_module #(
     wire dm_reset;
 
     /* ---- DM control ---- */
-    wire haltreq;
-    wire resethaltreq;
-    wire resumereq;
-    wire ndmreset;
+
     wire dmactive;
     wire sbcs_write_pulse;
     wire sbaddress0_write_pulse;

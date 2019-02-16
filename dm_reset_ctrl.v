@@ -4,7 +4,6 @@ module dm_reset_ctrl (
 
     // From dmcontrol register
     input  wire dmactive,     // dmcontrol.dmactive
-    input  wire ndmreset,     // dmcontrol.ndmreset
 
     // Outputs
     output reg  dm_reset     // Internal Debug Module reset

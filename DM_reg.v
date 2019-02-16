@@ -30,7 +30,6 @@ module DM_reg (
     /* from other dm blocks */
     input               hart_halted,
     input               hart_reset,
-    //input               hart_running,
     input               abstract_busy,
     input [2:0]    abstract_cmderr,
     input [31:0] ace_data_wdata,
@@ -185,7 +184,6 @@ reg [31:0] abstractauto;
     reg sel_invalid_addr_r;
     reg [3:0] progbuf_index_r;
     reg hart_halted_r;
-    //reg hart_running_r;
     reg hart_reset_r;
     reg abstract_busy_r;
     reg [2:0] abstract_cmderr_r;
@@ -233,7 +231,6 @@ assign hart_running_int =
         data_index_r      <=4'b0;
         hart_halted_r     <= 1'b0;
         hart_reset_r      <= 1'b0;
-        //hart_running_r    <= 1'b0;
         abstract_busy_r   <=1'b0;
         abstract_cmderr_r <=3'b0;
         sel_sbcs_r       <= 1'b0;
@@ -259,7 +256,6 @@ assign hart_running_int =
             progbuf_index_r <= progbuf_index;
             data_index_r <= data_index;         
             hart_halted_r <= hart_halted;
-            //hart_running_r <= hart_running;
             hart_reset_r <= hart_reset; 
             abstract_busy_r <= abstract_busy;
             abstract_cmderr_r <= abstract_cmderr;
@@ -456,7 +452,7 @@ end
                         4'd13: progbuf13_r <= dmi_wdata_r;
                         4'd14: progbuf14_r <= dmi_wdata_r;
                         4'd15: progbuf15_r <= dmi_wdata_r;
-                        //default: ;
+                     
                     endcase
                 end
             end

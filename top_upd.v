@@ -153,7 +153,7 @@ module debug_module #(
     wire [6:0]  cdc_dmi_req_addr;
     wire [31:0] cdc_dmi_req_data;
     wire [1:0]  cdc_dmi_req_op;
-    wire         cdc_dmi_req_pulse;
+    wire        cdc_dmi_req_pulse;
 
 
     // ------------------------------------------------------------
@@ -413,7 +413,6 @@ module debug_module #(
 
     /* ---- Reset wires ---- */
     wire dm_reset;
-    wire hartreset;
 
     /* ---- DM control ---- */
     wire haltreq;
@@ -494,7 +493,6 @@ module debug_module #(
         .dbg_clk    (dbg_clk),
         .dbg_resetn (dbg_resetn),
         .dmactive   (dmactive),
-        .ndmreset   (ndmreset),
         .dm_reset   (dm_reset)
     );
 
@@ -527,7 +525,6 @@ module debug_module #(
         /* From other DM blocks */
         .hart_halted     (hart_halted),
         .hart_reset      (hart_reset),
-        .hart_running   (hart_running),
         .abstract_busy  (abstract_busy),
         .abstract_cmderr(abstract_cmderr),
         .sel_sbcs       (sel_sbcs),

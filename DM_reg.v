@@ -197,7 +197,11 @@ reg [31:0] abstractauto;
 
 
 
+wire hart_running_int;
 
+assign hart_running_int =
+        !hart_halted_r &&
+        !hart_reset_r;
 
     wire dmi_write = (dmi_op_r == 2'b10);
     wire dmi_read  = (dmi_op_r == 2'b01);
@@ -515,8 +519,8 @@ end
                     2'b00,
                     2'b00,
                     2'b00,
-                    //hart_running_r,
-                    //hart_running_r,
+                    hart_running_int,
+                    hart_running_int,
                     hart_halted_r,
                     hart_halted_r,
                     3'b000,

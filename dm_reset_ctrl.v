@@ -11,16 +11,13 @@ module dm_reset_ctrl (
 );
 	
 	reg dmactive_r;
-	reg ndmreset_r;
 
 	always @(posedge dbg_clk or negedge dbg_resetn) begin
         if (!dbg_resetn) begin
 			dmactive_r <= 1'b0;
-			ndmreset_r <= 1'b0;
 		end 
 		else begin
 			dmactive_r <= dmactive;
-			ndmreset_r <= ndmreset;
 		end
 	end
 	
